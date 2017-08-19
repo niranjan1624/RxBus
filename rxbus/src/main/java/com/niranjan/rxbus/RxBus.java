@@ -23,6 +23,7 @@ public class RxBus {
     private static RxBus defaultInstance;
     private Object object;
     private List<Disposable> disposableList = new ArrayList<>();
+
     public static RxBus getDefault() {
         if (defaultInstance == null) {
             synchronized (RxBus.class) {
@@ -34,7 +35,7 @@ public class RxBus {
     }
 
     public void publish(@NonNull Object object, String identifier) {
-        if(subjectStringHashMap.containsKey(identifier)) {
+        if (subjectStringHashMap.containsKey(identifier)) {
             subjectStringHashMap.get(identifier).onNext(object);
         } else {
             throwIllegalStateException("No subscription for given identifier");
@@ -42,30 +43,37 @@ public class RxBus {
     }
 
     public Disposable subscribe(@NonNull Consumer<Object> action, @NonNull String identifier) {
-        if (TextUtils.isEmpty(identifier)) {
-            throwIllegalStateException("No identifier provided");
-        } else if (object == null || !identifierMap.containsKey(object)) {
-            throw new IllegalStateException("Subscriber class not registered!");
-        } else if (isIdentifierDuplicate(identifier)) {
-            throwIllegalStateException("Already subscribed with given identifier");
+        String exception = getEligibilityException(identifier);
+        if (TextUtils.isEmpty(exception)) {
+            return processSubscriptionAndGetDisposable(action, identifier);
         } else {
-            addIdentifierToMap(identifier);
-            PublishSubject<Object> sSubject = PublishSubject.create();
-            Disposable disposable  = sSubject.subscribe(action);
-            subjectStringHashMap.put(identifier, sSubject);
-            disposableList.add(disposable);
-            return disposable;
+            throwIllegalStateException(exception);
+            return Disposables.empty();
         }
-        return Disposables.empty();
+    }
+
+    private Disposable processSubscriptionAndGetDisposable(Consumer<Object> action, String identifier) {
+        addIdentifierToMap(identifier);
+        PublishSubject<Object> sSubject = PublishSubject.create();
+        Disposable disposable = sSubject.subscribe(action);
+        subjectStringHashMap.put(identifier, sSubject);
+        disposableList.add(disposable);
+        return disposable;
+    }
+
+    private String getEligibilityException(String identifier) {
+        if (TextUtils.isEmpty(identifier)) {
+            return "No identifier provided";
+        } else if (object == null || !identifierMap.containsKey(object)) {
+            return "Subscriber class not registered!";
+        } else if (isIdentifierDuplicate(identifier)) {
+            return "Already subscribed with given identifier";
+        }
+        return null;
     }
 
     private void addIdentifierToMap(String identifier) {
-        if (object == null)
-            throwIllegalStateException("Subscriber class not registered");
         List<String> identifierList = identifierMap.get(object);
-        if (identifierList != null) {
-            identifierList = new ArrayList<>();
-        }
         identifierList.add(identifier);
         identifierMap.put(object, identifierList);
     }
@@ -76,27 +84,42 @@ public class RxBus {
         return false;
     }
 
+    private void checkAndUnregister() {
+        if (object != null) {
+            unRegister(object);
+        }
+    }
+
     public void register(Object object) {
+        checkAndUnregister();
         if (identifierMap.containsKey(object)) {
             throwIllegalStateException("Subscriber already registered");
         } else {
             this.object = object;
-            identifierMap.put(object, new ArrayList<>());
+            identifierMap.put(this.object, new ArrayList<>());
         }
     }
 
     public void unRegister(Object object) {
         if (identifierMap.containsKey(object)) {
-            for(Disposable disposable : disposableList) {
-                disposable.dispose();
-            }
-            identifierMap.clear();
-            subjectStringHashMap.clear();
-            disposableList.clear();
-            this.object = null;
+            disposeAllSubscribers();
+            releaseAllData();
         } else {
             throwIllegalStateException("Subscriber is not registered");
         }
+    }
+
+    private void disposeAllSubscribers() {
+        for (Disposable disposable : disposableList) {
+            disposable.dispose();
+        }
+    }
+
+    private void releaseAllData() {
+        identifierMap.clear();
+        subjectStringHashMap.clear();
+        disposableList.clear();
+        this.object = null;
     }
 
     public void throwIllegalStateException(String exception) {
