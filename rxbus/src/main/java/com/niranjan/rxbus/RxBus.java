@@ -87,10 +87,12 @@ public class RxBus {
 
     public void unRegister(Object object) {
         if (identifierMap.containsKey(object)) {
-            identifierMap.remove(object);
             for(Disposable disposable : disposableList) {
                 disposable.dispose();
             }
+            identifierMap.clear();
+            subjectStringHashMap.clear();
+            disposableList.clear();
             this.object = null;
         } else {
             throwIllegalStateException("Subscriber is not registered");
