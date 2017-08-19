@@ -27,13 +27,18 @@ public class MainActivity extends AppCompatActivity {
         }, "Niranjan");
 
         findViewById(R.id.publish).setOnClickListener(view -> {
-            RxBus.getDefault().publish(new TestModel(editText.getText().toString()));
+            RxBus.getDefault().publish(new TestModel(editText.getText().toString()), "Niranjan");
+            RxBus.getDefault().publish("Niranjan", "Sai");
         });
+
+        RxBus.getDefault().subscribe(object -> {
+            Log.d("Message 2", String.valueOf(object));
+        }, "Sai");
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onStop() {
+        super.onStop();
         RxBus.getDefault().unRegister(this);
     }
 }
