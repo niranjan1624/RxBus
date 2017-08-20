@@ -1,4 +1,4 @@
-package com.niranjan.rxbussample;
+package com.niranjandroid.rxbussample;
 
 /**
  * Created by Niranjan P on 8/9/2017.

@@ -1,4 +1,4 @@
-package com.niranjan.rxbussample;
+package com.niranjandroid.rxbus;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.niranjan.rxbussample", appContext.getPackageName());
+        assertEquals("com.niranjan.rxbus.test", appContext.getPackageName());
     }
 }

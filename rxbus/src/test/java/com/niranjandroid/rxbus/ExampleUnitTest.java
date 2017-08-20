@@ -1,4 +1,4 @@
-package com.niranjan.rxbussample;
+package com.niranjandroid.rxbus;
 
 import org.junit.Test;
 

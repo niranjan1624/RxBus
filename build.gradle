@@ -25,7 +25,22 @@ task clean(type: Delete) {
 
 
 ext {
+    //sdk and tools
+    compileSdkVersion = 26
+    buildToolsVersion = "26.0.0"
+    minSdkVersion = 16
+    targetSdkVersion = 26
+
+    //version
+    versionCode = 1
+    versionName = "1.0"
+
+    //app dependencies
+    supportLibraryVersion = "26.+"
+    constraintLayoutVersion = "1.0.2"
     retrolambdaprojectlombokVersion = '0.2.3.a2'
     retrolambdaVersion = '3.2.5'
-    retrofitVersion = "2.1.0"
+    retrolambdaConfigVersion = "2.1.0"
+    rxJava2Version = "2.1.0"
+
 }

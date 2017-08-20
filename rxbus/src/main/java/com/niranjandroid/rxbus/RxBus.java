@@ -1,4 +1,4 @@
-package com.niranjan.rxbus;
+package com.niranjandroid.rxbus;
 
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
